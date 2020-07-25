@@ -1,52 +1,54 @@
 import {SET_CURRENT_USER, GET_ERRORS} from './types';
-import axios from 'axios';
+import axios from "axios";
 import setAuthToken from '../utils/setAuthToken';
 import jwt_decode from 'jwt-decode';
 
 //Register user
 export const registerUser = (userData, history) => dispatch => {
-  axios
-    .post('/api/users/register', userData)
-    .then(res => history.push('/login'))
-    .catch(err => 
-      dispatch({
-        type: GET_ERRORS,
-        payload: err.response.data
-      }));
-};
+    axios
+      .post("/api/users/register", userData)
+      .then(res => history.push('/login'))
+      .catch(err => 
+          dispatch({
+            type: GET_ERRORS,
+            payload: err.response.data
+          })
+        );
+}
 
-// Login - Get User Token
+//Login - get user token
 export const loginUser = userData => dispatch => {
   axios
-    .post("/api/users/login", userData)
-    .then((res) => {
-      // Save token to localstorage
+    .post('/api/users/login', userData)
+    .then(res => {
       const {token} = res.data;
+      //save to localstorage
       localStorage.setItem('jwtToken', token);
-      // Set token to axios header
+      //set token to axios auth header
       setAuthToken(token);
-      // Decode token
+      //Decode the token to get the user data
       const decoded = jwt_decode(token);
-      // Dispatch set current user
+      //Dispatch set_current_user 
       dispatch({
         type: SET_CURRENT_USER,
         payload: decoded
-      });
+      })
     })
     .catch(err =>
       dispatch({
         type: GET_ERRORS,
         payload: err.response.data
-      }));
-};
+      })
+    );
+}
 
-// Logout user 
+//Logout user action
 export const logoutUser = () => dispatch => {
-  //Remove token from localstorage
+  //Remove from localstorage
   localStorage.removeItem('jwtToken');
-  //Remove token from auth header
+  //Remove from auth header
   setAuthToken(false);
-  //reset the redux store to false and {}
+  //clean up from Redux Store
   dispatch({
     type: SET_CURRENT_USER,
     payload: {}
